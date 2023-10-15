@@ -28,6 +28,7 @@ public class CharsCounterServiceImpl implements CharsCounterService {
         StringBuilder sb = new StringBuilder();
 
         word.chars()
+                .filter(c -> !Character.isWhitespace((char) c))
                 .forEach(c -> entries.compute((char) c, (key, val) -> val == null ? 1 : val + 1));
 
         entries.forEach((key, value) -> {

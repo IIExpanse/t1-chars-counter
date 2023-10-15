@@ -1,6 +1,6 @@
 package ru.t1consulting.controller;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +18,7 @@ public class CharsCounterController {
     private final CharsCounterService service;
 
     @GetMapping("count")
-    public ResponseEntity<String> getCharsCount(@NotEmpty @RequestParam String word) {
+    public ResponseEntity<String> getCharsCount(@NotBlank @RequestParam String word) {
         return ResponseEntity.ok(service.getCharsCount(word));
     }
 }
