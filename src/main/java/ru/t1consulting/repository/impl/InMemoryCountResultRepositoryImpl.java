@@ -6,12 +6,13 @@ import ru.t1consulting.repository.CountResultRepository;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Репозиторий, реализующий кэширование фиксированного количества результатов обработки строк в памяти приложения.
+ * Удаляет результаты обработки из памяти при превышении лимита хранения либо истечения срока хранения.
+ */
 @Repository
 public class InMemoryCountResultRepositoryImpl implements CountResultRepository {
     private final Queue<CountResult> cachedResults;
@@ -27,17 +28,27 @@ public class InMemoryCountResultRepositoryImpl implements CountResultRepository 
         this.clock = Clock.systemDefaultZone();
     }
 
+    /**
+     * Конструктор для тестирования функционала по удалению данных с истекшим сроком хранения.
+     */
     public InMemoryCountResultRepositoryImpl(Clock clock) {
         this.cachedResults = new ArrayDeque<>(CAPACITY);
         this.resultsMap = new HashMap<>(CAPACITY);
         this.clock = clock;
     }
 
+    /**
+     * Сохранение готового результата и фиксация времени сохранения.
+     *
+     * @param word - переданная на вход строка.
+     * @param result - результат подсчета символов в строке.
+     * @return сохраненный результат подсчета,
+     */
     @Override
     public String addNewResult(String word, String result) {
         removeExpired();
 
-        CountResult countResult = new CountResult(word, result, Instant.now(clock));
+        CountResult countResult = new CountResult(word, Instant.now(clock));
         if (cachedResults.size() == CAPACITY) {
             resultsMap.remove(cachedResults.peek().word);
             cachedResults.poll();
@@ -48,14 +59,23 @@ public class InMemoryCountResultRepositoryImpl implements CountResultRepository 
         return resultsMap.get(word);
     }
 
+    /**
+     * Проверка наличия результата подсчета строки в кэше.
+     *
+     * @param word - переданная на вход строка.
+     * @return Optional, содержащий кэшированный результат или null ри его отсутствии.
+     */
     @Override
-    public String getIfExists(String word) {
+    public Optional<String> getIfExists(String word) {
         if (resultsMap.containsKey(word)) {
-            return resultsMap.get(word);
+            return Optional.of(resultsMap.get(word));
         }
-        return null;
+        return Optional.empty();
     }
 
+    /**
+     * Инициализация удаления кэшированных данных с истекшим сроком хранения (если есть).
+     */
     private void removeExpired() {
         while (!cachedResults.isEmpty()
                 && Duration.between(cachedResults.peek().requestInstant(), Instant.now(clock))
@@ -65,5 +85,5 @@ public class InMemoryCountResultRepositoryImpl implements CountResultRepository 
         }
     }
 
-    private record CountResult(String word, String result, Instant requestInstant) { }
+    private record CountResult(String word, Instant requestInstant) { }
 }

@@ -10,8 +10,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -28,11 +27,11 @@ class InMemoryCountResultRepositoryImplTest {
     @Test
     void getIfExists() {
         String word = getTestString();
-        assertNull(repository.getIfExists(word));
+        assertTrue(repository.getIfExists(word).isEmpty());
 
         String res = getTestResult();
         repository.addNewResult(word, res);
-        assertEquals(res, repository.getIfExists(word));
+        assertEquals(res, repository.getIfExists(word).get());
     }
 
     @Test
@@ -41,7 +40,7 @@ class InMemoryCountResultRepositoryImplTest {
 
         repository.addNewResult(getTestString(), getTestResult());
         repository.addNewResult(getTestString() + "a", getTestResult());
-        assertNull(repository.getIfExists(getTestString()));
+        assertTrue(repository.getIfExists(getTestString()).isEmpty());
     }
 
     private Clock getTestClock() {

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -18,20 +17,17 @@ import java.util.List;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    /**
+     * Общий обработчик ошибок, позволяющий задать возвращаемый код ошибки и формат сообщения об ошибке.
+     * Может быть расширен.
+     */
     @ExceptionHandler({
-            MethodArgumentNotValidException.class,
-            ConstraintViolationException.class,
-            IllegalArgumentException.class
+            ConstraintViolationException.class
     })
     ResponseEntity<ApiError> handleBadRequestExceptions(final Exception e) {
         String exceptionName = e.getClass().getName();
         String exceptionMessage = e.getMessage();
         exceptionName = exceptionName.substring(exceptionName.lastIndexOf(".") + 1);
-
-        if (e instanceof MethodArgumentNotValidException) {
-            int start = exceptionMessage.lastIndexOf("[") + 1;
-            exceptionMessage = e.getMessage().substring(start, exceptionMessage.indexOf("]", start));
-        }
 
         log.debug(e.getMessage());
         return new ResponseEntity<>(

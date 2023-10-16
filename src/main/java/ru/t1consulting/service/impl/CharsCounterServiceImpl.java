@@ -12,16 +12,26 @@ import java.util.*;
 public class CharsCounterServiceImpl implements CharsCounterService {
     private final CountResultRepository repository;
 
+    /**
+     * Метод для возврата результата подсчета символов в строке.
+     * Перед вызовом метода подсчета проверяет, содержится ли данная строка в кэше приложения.
+     *
+     * @param word - переданная на вход строка.
+     * @return результат подсчета символов в формате "“a”: 5, “c”: 4, “b”: 1",
+     */
     @Override
     public String getCharsCount(String word) {
-        String count = repository.getIfExists(word);
-        if (count != null) {
-            return count;
-        }
-
-        return repository.addNewResult(word, countChars(word));
+        return repository.getIfExists(word)
+                .orElseGet(() -> repository.addNewResult(word, countChars(word)));
     }
 
+    /**
+     * Метод для подсчета количества символов и вывода отсортированного результата.
+     * Игнорирует неотображаемые символы.
+     *
+     * @param word - переданная на вход строка.
+     * @return результат подсчета символов в формате "“a”: 5, “c”: 4, “b”: 1",
+     */
     private String countChars(String word) {
         Map<Character, Integer> entries = new HashMap<>();
         Map<Integer, Queue<Character>> wordsByCounts = new HashMap<>();

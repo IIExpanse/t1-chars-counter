@@ -22,7 +22,7 @@
         <java.version>17</java.version>
     </properties>
 
-    <name>career</name>
+    <name>t1-chars-counter</name>
     <description>Test task which returns chars count for a supplied string in sorted (by counts) order</description>
 
     <dependencies>
